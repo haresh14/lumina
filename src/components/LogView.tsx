@@ -71,24 +71,43 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
           <h3 className="text-xl font-medium text-stone-800">Energy & Sleep</h3>
           
-          <div className="space-y-4">
-            <label className="flex justify-between text-sm font-bold text-stone-500 uppercase tracking-wider">
-              <span>Energy Level</span>
-              <span>{energy}/5</span>
-            </label>
-            <div className="flex gap-2">
+          <div className="space-y-6">
+            <div className="flex justify-between items-end">
+              <div>
+                <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">Energy Level</label>
+                <p className="text-lg font-bold text-stone-900">
+                  {energy === 1 && "Exhausted"}
+                  {energy === 2 && "Low"}
+                  {energy === 3 && "Moderate"}
+                  {energy === 4 && "High"}
+                  {energy === 5 && "Peak"}
+                </p>
+              </div>
+              <span className="text-2xl font-black text-stone-200">0{energy}</span>
+            </div>
+            
+            <div className="flex gap-2 h-16">
               {[1, 2, 3, 4, 5].map((v) => (
                 <button
                   key={v}
                   onClick={() => setEnergy(v)}
                   className={cn(
-                    "flex-1 h-12 rounded-xl flex items-center justify-center transition-all",
-                    energy >= v ? "bg-emerald-500 text-white" : "bg-stone-100 text-stone-400"
+                    "flex-1 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border-2",
+                    energy === v 
+                      ? "bg-stone-900 border-stone-900 text-white shadow-lg shadow-stone-900/20 scale-105 z-10" 
+                      : "bg-white border-stone-100 text-stone-400 hover:border-stone-200"
                   )}
                 >
-                  {v === 1 && <BatteryLow className="w-5 h-5" />}
-                  {v === 3 && <Battery className="w-5 h-5" />}
-                  {v === 5 && <Zap className="w-5 h-5" />}
+                  <div className={cn(
+                    "w-1.5 h-1.5 rounded-full mb-1",
+                    energy >= v ? (
+                      v === 1 ? "bg-red-400" :
+                      v === 2 ? "bg-orange-400" :
+                      v === 3 ? "bg-yellow-400" :
+                      v === 4 ? "bg-emerald-400" : "bg-blue-400"
+                    ) : "bg-stone-200"
+                  )} />
+                  <span className="text-[10px] font-black tracking-tighter uppercase">{v}</span>
                 </button>
               ))}
             </div>
