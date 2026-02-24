@@ -1,0 +1,5 @@
+{
+  "name": "Lumina",
+  "description": "A mobile-first health tracking application for daily logging, trend analysis, and correlation tracking.",
+  "requestFramePermissions": []
+}
