@@ -1,25 +1,44 @@
-import React, { useState } from 'react';
-import { Calendar, Filter, Download, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Filter, Download, X, Loader2 } from 'lucide-react';
 import { format, isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '../utils';
-
-const activities = [
-  { id: 1, date: '2026-02-24', mood: 'Great', energy: 5, sleep: 8, symptoms: ['None'] },
-  { id: 2, date: '2026-02-23', mood: 'Good', energy: 4, sleep: 7.5, symptoms: ['Headache'] },
-  { id: 3, date: '2026-02-22', mood: 'Okay', energy: 3, sleep: 6, symptoms: ['Fatigue'] },
-  { id: 4, date: '2026-02-21', mood: 'Bad', energy: 2, sleep: 5.5, symptoms: ['Anxiety'] },
-  { id: 5, date: '2026-02-20', mood: 'Good', energy: 4, sleep: 7, symptoms: ['None'] },
-];
+import { supabase } from '../services/supabase';
+import { useAuth } from '../hooks/useAuth';
 
 export const ActivityView: React.FC = () => {
+  const { user } = useAuth();
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchActivities = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('logs')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setActivities(data || []);
+      } catch (err) {
+        console.error('Error fetching activities:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, [user]);
+
   const filteredActivities = activities.filter((activity) => {
     if (!startDate && !endDate) return true;
     
-    const activityDate = parseISO(activity.date);
+    const activityDate = new Date(activity.created_at);
     const start = startDate ? startOfDay(parseISO(startDate)) : new Date(0);
     const end = endDate ? endOfDay(parseISO(endDate)) : new Date(8640000000000000);
 
@@ -29,6 +48,17 @@ export const ActivityView: React.FC = () => {
   const clearFilters = () => {
     setStartDate('');
     setEndDate('');
+  };
+
+  const getMoodLabel = (mood: number) => {
+    switch (mood) {
+      case 1: return 'Awful';
+      case 2: return 'Bad';
+      case 3: return 'Okay';
+      case 4: return 'Good';
+      case 5: return 'Great';
+      default: return 'Unknown';
+    }
   };
 
   return (
@@ -91,24 +121,29 @@ export const ActivityView: React.FC = () => {
       )}
 
       <div className="space-y-4">
-        {filteredActivities.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center p-12">
+            <Loader2 className="w-8 h-8 animate-spin text-stone-300" />
+          </div>
+        ) : filteredActivities.length > 0 ? (
           filteredActivities.map((activity) => (
             <div key={activity.id} className="bg-white p-5 rounded-3xl border border-stone-200 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-stone-400" />
                   <span className="text-sm font-bold text-stone-900">
-                    {format(parseISO(activity.date), 'MMM dd, yyyy')}
+                    {format(new Date(activity.created_at), 'MMM dd, yyyy')}
                   </span>
                 </div>
                 <span className={cn(
                   "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                  activity.mood === 'Great' ? "bg-blue-100 text-blue-600" :
-                  activity.mood === 'Good' ? "bg-emerald-100 text-emerald-600" :
-                  activity.mood === 'Okay' ? "bg-yellow-100 text-yellow-600" :
+                  activity.mood === 5 ? "bg-blue-100 text-blue-600" :
+                  activity.mood === 4 ? "bg-emerald-100 text-emerald-600" :
+                  activity.mood === 3 ? "bg-yellow-100 text-yellow-600" :
+                  activity.mood === 2 ? "bg-orange-100 text-orange-600" :
                   "bg-red-100 text-red-600"
                 )}>
-                  {activity.mood}
+                  {getMoodLabel(activity.mood)}
                 </span>
               </div>
 
@@ -122,19 +157,23 @@ export const ActivityView: React.FC = () => {
                   <p className="font-bold text-stone-900">{activity.sleep}h</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Symptoms</p>
-                  <p className="font-bold text-stone-900">{activity.symptoms.length}</p>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Interventions</p>
+                  <p className="font-bold text-stone-900">{activity.interventions?.length || 0}</p>
                 </div>
               </div>
 
-              {activity.symptoms[0] !== 'None' && (
+              {activity.interventions && activity.interventions.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {activity.symptoms.map(s => (
+                  {activity.interventions.map((s: string) => (
                     <span key={s} className="text-[10px] bg-stone-100 text-stone-600 px-2 py-1 rounded-lg font-medium">
                       {s}
                     </span>
                   ))}
                 </div>
+              )}
+
+              {activity.notes && (
+                <p className="text-xs text-stone-500 italic line-clamp-2">"{activity.notes}"</p>
               )}
             </div>
           ))

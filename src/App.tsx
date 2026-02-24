@@ -7,6 +7,7 @@ import { LogView } from './components/LogView';
 import { TrendsView } from './components/TrendsView';
 import { ActivityView } from './components/ActivityView';
 import { motion, AnimatePresence } from 'motion/react';
+import { format } from 'date-fns';
 
 function AppContent() {
   const { user, loading, signOut } = useAuth();
@@ -45,11 +46,11 @@ function AppContent() {
             <div className="bg-white rounded-3xl p-6 border border-stone-200 shadow-sm space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-stone-200 rounded-full overflow-hidden">
-                  <img src="https://picsum.photos/seed/alex/200/200" alt="Avatar" referrerPolicy="no-referrer" />
+                  <img src={`https://picsum.photos/seed/${user.id}/200/200`} alt="Avatar" referrerPolicy="no-referrer" />
                 </div>
                 <div>
-                  <p className="font-bold text-lg text-stone-900">{user.email}</p>
-                  <p className="text-sm text-stone-500">Member since Feb 2026</p>
+                  <p className="font-bold text-lg text-stone-900 truncate max-w-[200px]">{user.email}</p>
+                  <p className="text-sm text-stone-500">Member since {format(new Date(user.created_at), 'MMM yyyy')}</p>
                 </div>
               </div>
               
