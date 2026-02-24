@@ -48,24 +48,24 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
 
       {step === 1 && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-          <h3 className="text-xl font-medium text-stone-800">How are you feeling?</h3>
-          <div className="flex gap-2">
+          <h3 className="text-xl font-medium text-stone-800 text-center">How are you feeling?</h3>
+          <div className="grid grid-cols-5 gap-1.5">
             {moods.map((m) => (
               <button
                 key={m.value}
                 onClick={() => { setMood(m.value); setStep(2); }}
                 className={cn(
-                  "flex-1 flex flex-col items-center gap-3 p-4 rounded-3xl transition-all border-2",
+                  "flex flex-col items-center gap-2 py-4 px-1 rounded-2xl transition-all border-2",
                   mood === m.value 
-                    ? "bg-stone-900 border-stone-900 text-white shadow-xl shadow-stone-900/20 scale-105 z-10" 
+                    ? "bg-stone-900 border-stone-900 text-white shadow-lg shadow-stone-900/20 scale-105 z-10" 
                     : "bg-white border-stone-100 text-stone-400 hover:border-stone-200"
                 )}
               >
                 <m.icon className={cn(
-                  "w-10 h-10 transition-transform duration-300",
+                  "w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-300",
                   mood === m.value ? "text-white scale-110" : m.color
                 )} />
-                <span className="text-[10px] font-black uppercase tracking-widest">{m.label}</span>
+                <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-tighter sm:tracking-widest text-center">{m.label}</span>
               </button>
             ))}
           </div>
@@ -82,7 +82,7 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
               <span className="text-sm font-bold text-stone-400 uppercase tracking-widest">{energy}/5</span>
             </div>
             
-            <div className="flex gap-2">
+            <div className="grid grid-cols-5 gap-1.5">
               {[
                 { v: 1, label: 'Exhausted', icon: BatteryLow, color: 'text-red-500', bg: 'bg-red-50', active: 'bg-red-500' },
                 { v: 2, label: 'Low', icon: Battery, color: 'text-orange-500', bg: 'bg-orange-50', active: 'bg-orange-500' },
@@ -94,7 +94,7 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
                   key={item.v}
                   onClick={() => setEnergy(item.v)}
                   className={cn(
-                    "flex-1 flex flex-col items-center gap-2 p-3 rounded-2xl transition-all border-2",
+                    "flex flex-col items-center gap-2 py-3 px-1 rounded-2xl transition-all border-2",
                     energy === item.v 
                       ? `border-stone-900 ${item.active} text-white shadow-lg shadow-stone-900/10 scale-105 z-10` 
                       : "bg-white border-stone-100 text-stone-400 hover:border-stone-200"
