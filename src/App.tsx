@@ -6,12 +6,14 @@ import { HomeView } from './components/HomeView';
 import { LogView } from './components/LogView';
 import { TrendsView } from './components/TrendsView';
 import { ActivityView } from './components/ActivityView';
+import { PreferencesView } from './components/PreferencesView';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 
 function AppContent() {
   const { user, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  const [showPreferences, setShowPreferences] = useState(false);
 
   if (loading) {
     return (
@@ -36,6 +38,9 @@ function AppContent() {
       case 'activity':
         return <ActivityView />;
       case 'profile':
+        if (showPreferences) {
+          return <PreferencesView onBack={() => setShowPreferences(false)} />;
+        }
         return (
           <div className="p-8 max-w-lg mx-auto space-y-8">
             <header>
@@ -55,7 +60,12 @@ function AppContent() {
               </div>
               
               <div className="pt-6 border-t border-stone-100 space-y-4">
-                <button className="w-full text-left px-4 py-3 rounded-xl hover:bg-stone-50 transition-colors font-medium text-stone-700">Account Preferences</button>
+                <button 
+                  onClick={() => setShowPreferences(true)}
+                  className="w-full text-left px-4 py-3 rounded-xl hover:bg-stone-50 transition-colors font-medium text-stone-700"
+                >
+                  Account Preferences
+                </button>
                 <button className="w-full text-left px-4 py-3 rounded-xl hover:bg-stone-50 transition-colors font-medium text-stone-700">Notification Settings</button>
                 <button className="w-full text-left px-4 py-3 rounded-xl hover:bg-stone-50 transition-colors font-medium text-stone-700">Export Data (CSV)</button>
               </div>
@@ -87,7 +97,10 @@ function AppContent() {
           {renderContent()}
         </motion.div>
       </AnimatePresence>
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav activeTab={activeTab} onTabChange={(tab) => {
+        setActiveTab(tab);
+        setShowPreferences(false);
+      }} />
     </div>
   );
 }
