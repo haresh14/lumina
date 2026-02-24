@@ -43,7 +43,7 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
     <div className="p-6 pb-32 max-w-lg mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold text-stone-900">Daily Log</h2>
-        <span className="text-sm font-bold text-stone-400 uppercase tracking-widest">Step {step}/5</span>
+        <span className="text-sm font-bold text-stone-400 uppercase tracking-widest">Step {step}/4</span>
       </div>
 
       {step === 1 && (
@@ -150,24 +150,36 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
 
       {step === 3 && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-          <h3 className="text-xl font-medium text-stone-800">Interventions</h3>
-          <p className="text-stone-500 text-sm">What did you do today to support your health?</p>
-          
-          <div className="flex flex-wrap gap-2">
-            {interventions.map((item) => (
-              <button
-                key={item}
-                onClick={() => toggleIntervention(item)}
-                className={cn(
-                  "px-4 py-2 rounded-full text-sm font-medium transition-all border",
-                  selectedInterventions.includes(item)
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-900/10"
-                    : "bg-white text-stone-600 border-stone-200 hover:border-stone-300"
-                )}
-              >
-                {item}
-              </button>
-            ))}
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium text-stone-800">Interventions</h3>
+            <p className="text-stone-500 text-sm">What did you do today to support your health?</p>
+            <div className="flex flex-wrap gap-2">
+              {interventions.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => toggleIntervention(item)}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-sm font-medium transition-all border",
+                    selectedInterventions.includes(item)
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-900/10"
+                      : "bg-white text-stone-600 border-stone-200 hover:border-stone-300"
+                  )}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium text-stone-800">Notes</h3>
+            <p className="text-stone-500 text-sm">Any other observations or thoughts for today?</p>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="How was your day? Any specific triggers or wins?"
+              className="w-full h-32 p-4 bg-white border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none resize-none text-stone-700"
+            />
           </div>
 
           <button
@@ -180,27 +192,6 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
       )}
 
       {step === 4 && (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-          <h3 className="text-xl font-medium text-stone-800">Notes</h3>
-          <p className="text-stone-500 text-sm">Any other observations or thoughts for today?</p>
-          
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="How was your day? Any specific triggers or wins?"
-            className="w-full h-40 p-4 bg-white border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none resize-none text-stone-700"
-          />
-
-          <button
-            onClick={() => setStep(5)}
-            className="w-full py-4 bg-stone-900 text-white rounded-2xl font-bold uppercase tracking-widest text-sm"
-          >
-            Next
-          </button>
-        </motion.div>
-      )}
-
-      {step === 5 && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
           <h3 className="text-xl font-medium text-stone-800">Quick Summary</h3>
           <div className="bg-white rounded-3xl p-6 border border-stone-200 space-y-4">
