@@ -72,61 +72,83 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
           <h3 className="text-xl font-medium text-stone-800">Energy & Sleep</h3>
           
           <div className="space-y-6">
-            <div className="flex justify-between items-end">
-              <div>
-                <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">Energy Level</label>
-                <p className="text-lg font-bold text-stone-900">
-                  {energy === 1 && "Exhausted"}
-                  {energy === 2 && "Low"}
-                  {energy === 3 && "Moderate"}
-                  {energy === 4 && "High"}
-                  {energy === 5 && "Peak"}
-                </p>
-              </div>
-              <span className="text-2xl font-black text-stone-200">0{energy}</span>
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-medium text-stone-800">Energy Level</h3>
+              <span className="text-sm font-bold text-stone-400 uppercase tracking-widest">{energy}/5</span>
             </div>
             
-            <div className="flex gap-2 h-16">
-              {[1, 2, 3, 4, 5].map((v) => (
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { v: 1, label: 'Exhausted', desc: 'Barely keeping eyes open', icon: BatteryLow, color: 'text-red-500', bg: 'bg-red-50' },
+                { v: 2, label: 'Low', desc: 'Feeling sluggish and tired', icon: Battery, color: 'text-orange-500', bg: 'bg-orange-50' },
+                { v: 3, label: 'Moderate', desc: 'Stable but not vibrant', icon: Battery, color: 'text-yellow-500', bg: 'bg-yellow-50' },
+                { v: 4, label: 'High', desc: 'Productive and alert', icon: Zap, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                { v: 5, label: 'Peak', desc: 'Limitless energy and focus', icon: Sun, color: 'text-blue-500', bg: 'bg-blue-50' },
+              ].map((item) => (
                 <button
-                  key={v}
-                  onClick={() => setEnergy(v)}
+                  key={item.v}
+                  onClick={() => setEnergy(item.v)}
                   className={cn(
-                    "flex-1 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border-2",
-                    energy === v 
-                      ? "bg-stone-900 border-stone-900 text-white shadow-lg shadow-stone-900/20 scale-105 z-10" 
-                      : "bg-white border-stone-100 text-stone-400 hover:border-stone-200"
+                    "flex items-center gap-4 p-4 rounded-2xl transition-all border-2 text-left group",
+                    energy === item.v 
+                      ? "bg-stone-900 border-stone-900 shadow-lg shadow-stone-900/10" 
+                      : "bg-white border-stone-100 hover:border-stone-200"
                   )}
                 >
                   <div className={cn(
-                    "w-1.5 h-1.5 rounded-full mb-1",
-                    energy >= v ? (
-                      v === 1 ? "bg-red-400" :
-                      v === 2 ? "bg-orange-400" :
-                      v === 3 ? "bg-yellow-400" :
-                      v === 4 ? "bg-emerald-400" : "bg-blue-400"
-                    ) : "bg-stone-200"
-                  )} />
-                  <span className="text-[10px] font-black tracking-tighter uppercase">{v}</span>
+                    "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
+                    energy === item.v ? "bg-white/10 text-white" : `${item.bg} ${item.color}`
+                  )}>
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <p className={cn(
+                      "font-bold transition-colors",
+                      energy === item.v ? "text-white" : "text-stone-900"
+                    )}>{item.label}</p>
+                    <p className={cn(
+                      "text-xs transition-colors",
+                      energy === item.v ? "text-stone-400" : "text-stone-500"
+                    )}>{item.desc}</p>
+                  </div>
+                  {energy === item.v && (
+                    <motion.div 
+                      layoutId="energy-check"
+                      className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center"
+                    >
+                      <Check className="w-4 h-4 text-white" />
+                    </motion.div>
+                  )}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-4">
-            <label className="flex justify-between text-sm font-bold text-stone-500 uppercase tracking-wider">
-              <span>Sleep Duration</span>
-              <span>{sleep} hours</span>
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="12"
-              step="0.5"
-              value={sleep}
-              onChange={(e) => setSleep(parseFloat(e.target.value))}
-              className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-900"
-            />
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-medium text-stone-800">Sleep Duration</h3>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-stone-900">{sleep}</span>
+                <span className="text-sm font-bold text-stone-400 uppercase tracking-widest">hours</span>
+              </div>
+            </div>
+            
+            <div className="relative pt-4 pb-8">
+              <input
+                type="range"
+                min="0"
+                max="12"
+                step="0.5"
+                value={sleep}
+                onChange={(e) => setSleep(parseFloat(e.target.value))}
+                className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-900"
+              />
+              <div className="flex justify-between mt-4 px-1">
+                {[0, 4, 8, 12].map((val) => (
+                  <span key={val} className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">{val}h</span>
+                ))}
+              </div>
+            </div>
           </div>
 
           <button
