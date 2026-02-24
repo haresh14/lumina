@@ -50,6 +50,35 @@ export const ActivityView: React.FC = () => {
     setEndDate('');
   };
 
+  const handleExport = () => {
+    if (filteredActivities.length === 0) return;
+
+    const headers = ['Date', 'Mood', 'Energy', 'Sleep', 'Interventions', 'Notes'];
+    const rows = filteredActivities.map(activity => [
+      format(new Date(activity.created_at), 'yyyy-MM-dd HH:mm'),
+      getMoodLabel(activity.mood),
+      activity.energy,
+      activity.sleep,
+      (activity.interventions || []).join('; '),
+      (activity.notes || '').replace(/"/g, '""')
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `lumina-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const getMoodLabel = (mood: number) => {
     switch (mood) {
       case 1: return 'Awful';
@@ -78,7 +107,11 @@ export const ActivityView: React.FC = () => {
           >
             <Filter className="w-5 h-5" />
           </button>
-          <button className="p-2 bg-white border border-stone-200 rounded-xl text-stone-600">
+          <button 
+            onClick={handleExport}
+            disabled={filteredActivities.length === 0}
+            className="p-2 bg-white border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download className="w-5 h-5" />
           </button>
         </div>
