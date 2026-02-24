@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Smile, Frown, Meh, Sun, Cloud, Moon, Zap, Battery, BatteryLow, Check } from 'lucide-react';
+import { Smile, Frown, Meh, Sun, Cloud, Moon, Zap, Battery, BatteryLow, Check, Loader2 } from 'lucide-react';
 import { cn } from '../utils';
 import { Mood } from '../types';
+import { supabase } from '../services/supabase';
+import { useAuth } from '../hooks/useAuth';
 
 interface LogViewProps {
   onComplete: () => void;
 }
 
 export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [mood, setMood] = useState<Mood | null>(null);
   const [energy, setEnergy] = useState(3);
   const [sleep, setSleep] = useState(7);
   const [selectedInterventions, setSelectedInterventions] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const moods: { value: Mood; icon: any; label: string; color: string }[] = [
     { value: 1, icon: Frown, label: 'Awful', color: 'text-red-500' },
@@ -34,9 +39,34 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
     );
   };
 
-  const handleFinish = () => {
-    // In a real app, save to Supabase here
-    onComplete();
+  const handleFinish = async () => {
+    if (!user) return;
+    
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const { error: submitError } = await supabase
+        .from('logs')
+        .insert([
+          {
+            user_id: user.id,
+            mood,
+            energy,
+            sleep,
+            interventions: selectedInterventions,
+            notes: notes.trim() || null,
+          }
+        ]);
+
+      if (submitError) throw submitError;
+      onComplete();
+    } catch (err: any) {
+      console.error('Error saving log:', err);
+      setError(err.message || 'Failed to save log. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -227,12 +257,21 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
             )}
           </div>
 
+          {error && (
+            <p className="text-red-500 text-xs text-center font-medium">{error}</p>
+          )}
+
           <button
             onClick={handleFinish}
-            className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2"
+            disabled={isSubmitting}
+            className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Check className="w-5 h-5" />
-            Complete Log
+            {isSubmitting ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Check className="w-5 h-5" />
+            )}
+            {isSubmitting ? 'Saving...' : 'Complete Log'}
           </button>
         </motion.div>
       )}

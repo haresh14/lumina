@@ -1,18 +1,69 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-
-const data = [
-  { date: 'Mon', mood: 3, sleep: 6 },
-  { date: 'Tue', mood: 4, sleep: 7.5 },
-  { date: 'Wed', mood: 2, sleep: 5 },
-  { date: 'Thu', mood: 4, sleep: 8 },
-  { date: 'Fri', mood: 5, sleep: 7 },
-  { date: 'Sat', mood: 4, sleep: 9 },
-  { date: 'Sun', mood: 5, sleep: 8.5 },
-];
+import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
+import { supabase } from '../services/supabase';
+import { useAuth } from '../hooks/useAuth';
+import { format, subDays, startOfDay } from 'date-fns';
 
 export const TrendsView: React.FC = () => {
+  const { user } = useAuth();
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchLogs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('logs')
+          .select('*')
+          .gte('created_at', subDays(new Date(), 7).toISOString())
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        
+        // Process data for charts
+        const chartData = data?.map(log => ({
+          date: format(new Date(log.created_at), 'EEE'),
+          mood: log.mood,
+          sleep: log.sleep,
+          fullDate: log.created_at
+        })) || [];
+
+        setLogs(chartData);
+      } catch (err) {
+        console.error('Error fetching trends:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLogs();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  }
+
+  if (logs.length === 0) {
+    return (
+      <div className="p-6 max-w-lg mx-auto space-y-8">
+        <header>
+          <h2 className="text-2xl font-bold text-stone-900">Insights</h2>
+          <p className="text-stone-500">Weekly health correlations</p>
+        </header>
+        <div className="bg-white rounded-3xl p-12 border border-dashed border-stone-200 text-center">
+          <p className="text-stone-400">Not enough data yet. Keep logging to see your insights!</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 pb-32 space-y-8 max-w-lg mx-auto">
       <header>
@@ -24,7 +75,7 @@ export const TrendsView: React.FC = () => {
         <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Mood vs Sleep</h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
+            <AreaChart data={logs}>
               <defs>
                 <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
@@ -59,7 +110,7 @@ export const TrendsView: React.FC = () => {
         <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Correlation Detail</h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={logs}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis 
                 dataKey="date" 
@@ -109,7 +160,7 @@ export const TrendsView: React.FC = () => {
         <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Mood by Sleep Duration</h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={[...data].sort((a, b) => a.sleep - b.sleep)}>
+            <LineChart data={[...logs].sort((a, b) => a.sleep - b.sleep)}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis 
                 dataKey="sleep" 

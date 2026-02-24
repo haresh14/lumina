@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { motion } from 'motion/react';
-import { LogIn, Mail } from 'lucide-react';
+import { LogIn, Mail, UserCircle } from 'lucide-react';
+import { cn } from '../utils';
 
 export const AuthView: React.FC = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const { signInAsDemo } = useAuth();
+  const { signInAnonymously } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,10 +84,11 @@ export const AuthView: React.FC = () => {
         </div>
 
         <button
-          onClick={signInAsDemo}
+          onClick={signInAnonymously}
           className="w-full py-3 bg-white border border-stone-200 text-stone-700 rounded-xl font-semibold hover:bg-stone-50 transition-colors flex items-center justify-center gap-2"
         >
-          Explore Demo Mode
+          <UserCircle className="w-5 h-5" />
+          Continue Anonymously
         </button>
 
         {message && (
@@ -104,5 +106,3 @@ export const AuthView: React.FC = () => {
     </div>
   );
 };
-
-import { cn } from '../utils';

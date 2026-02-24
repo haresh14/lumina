@@ -6,14 +6,14 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  signInAsDemo: () => void;
+  signInAnonymously: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   signOut: async () => {},
-  signInAsDemo: () => {},
+  signInAnonymously: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -21,14 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for demo user in session storage first
-    const demoUser = sessionStorage.getItem('lumina_demo_user');
-    if (demoUser) {
-      setUser(JSON.parse(demoUser));
-      setLoading(false);
-      return;
-    }
-
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -37,33 +29,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Listen for changes on auth state (logged in, signed out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!sessionStorage.getItem('lumina_demo_user')) {
-        setUser(session?.user ?? null);
-      }
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInAsDemo = () => {
-    const mockUser = {
-      id: 'demo-user-id',
-      email: 'demo@lumina.app',
-      user_metadata: { full_name: 'Demo User' }
-    } as any;
-    sessionStorage.setItem('lumina_demo_user', JSON.stringify(mockUser));
-    setUser(mockUser);
+  const signInAnonymously = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error signing in anonymously:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = async () => {
-    sessionStorage.removeItem('lumina_demo_user');
     await supabase.auth.signOut();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signOut, signInAsDemo }}>
+    <AuthContext.Provider value={{ user, loading, signOut, signInAnonymously }}>
       {children}
     </AuthContext.Provider>
   );
