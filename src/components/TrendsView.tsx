@@ -105,6 +105,43 @@ export const TrendsView: React.FC = () => {
         </div>
       </div>
 
+      <div className="bg-white rounded-3xl p-6 border border-stone-200 shadow-sm">
+        <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Mood by Sleep Duration</h3>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={[...data].sort((a, b) => a.sleep - b.sleep)}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis 
+                dataKey="sleep" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 12, fill: '#94a3b8' }}
+                label={{ value: 'Sleep Hours', position: 'insideBottom', offset: -5, fontSize: 10, fill: '#94a3b8' }}
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 12, fill: '#94a3b8' }}
+                domain={[0, 5]}
+              />
+              <Tooltip 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                labelFormatter={(value) => `${value} hours of sleep`}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="mood" 
+                stroke="#10b981" 
+                strokeWidth={4} 
+                dot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 8 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="text-center text-xs text-stone-400 mt-4 italic">Higher sleep duration generally correlates with better mood.</p>
+      </div>
+
       <div className="space-y-4">
         <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Correlations</h3>
         <div className="grid grid-cols-1 gap-4">
