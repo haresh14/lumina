@@ -49,18 +49,23 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
       {step === 1 && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
           <h3 className="text-xl font-medium text-stone-800">How are you feeling?</h3>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="flex gap-2">
             {moods.map((m) => (
               <button
                 key={m.value}
                 onClick={() => { setMood(m.value); setStep(2); }}
                 className={cn(
-                  "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all",
-                  mood === m.value ? "bg-stone-900 text-white" : "bg-white border border-stone-200 text-stone-400"
+                  "flex-1 flex flex-col items-center gap-3 p-4 rounded-3xl transition-all border-2",
+                  mood === m.value 
+                    ? "bg-stone-900 border-stone-900 text-white shadow-xl shadow-stone-900/20 scale-105 z-10" 
+                    : "bg-white border-stone-100 text-stone-400 hover:border-stone-200"
                 )}
               >
-                <m.icon className={cn("w-8 h-8", mood === m.value ? "text-white" : m.color)} />
-                <span className="text-[10px] font-bold uppercase">{m.label}</span>
+                <m.icon className={cn(
+                  "w-10 h-10 transition-transform duration-300",
+                  mood === m.value ? "text-white scale-110" : m.color
+                )} />
+                <span className="text-[10px] font-black uppercase tracking-widest">{m.label}</span>
               </button>
             ))}
           </div>
@@ -77,48 +82,31 @@ export const LogView: React.FC<LogViewProps> = ({ onComplete }) => {
               <span className="text-sm font-bold text-stone-400 uppercase tracking-widest">{energy}/5</span>
             </div>
             
-            <div className="grid grid-cols-1 gap-3">
+            <div className="flex gap-2">
               {[
-                { v: 1, label: 'Exhausted', desc: 'Barely keeping eyes open', icon: BatteryLow, color: 'text-red-500', bg: 'bg-red-50' },
-                { v: 2, label: 'Low', desc: 'Feeling sluggish and tired', icon: Battery, color: 'text-orange-500', bg: 'bg-orange-50' },
-                { v: 3, label: 'Moderate', desc: 'Stable but not vibrant', icon: Battery, color: 'text-yellow-500', bg: 'bg-yellow-50' },
-                { v: 4, label: 'High', desc: 'Productive and alert', icon: Zap, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                { v: 5, label: 'Peak', desc: 'Limitless energy and focus', icon: Sun, color: 'text-blue-500', bg: 'bg-blue-50' },
+                { v: 1, label: 'Exhausted', icon: BatteryLow, color: 'text-red-500', bg: 'bg-red-50', active: 'bg-red-500' },
+                { v: 2, label: 'Low', icon: Battery, color: 'text-orange-500', bg: 'bg-orange-50', active: 'bg-orange-500' },
+                { v: 3, label: 'Moderate', icon: Battery, color: 'text-yellow-500', bg: 'bg-yellow-50', active: 'bg-yellow-500' },
+                { v: 4, label: 'High', icon: Zap, color: 'text-emerald-500', bg: 'bg-emerald-50', active: 'bg-emerald-500' },
+                { v: 5, label: 'Peak', icon: Sun, color: 'text-blue-500', bg: 'bg-blue-50', active: 'bg-blue-500' },
               ].map((item) => (
                 <button
                   key={item.v}
                   onClick={() => setEnergy(item.v)}
                   className={cn(
-                    "flex items-center gap-4 p-4 rounded-2xl transition-all border-2 text-left group",
+                    "flex-1 flex flex-col items-center gap-2 p-3 rounded-2xl transition-all border-2",
                     energy === item.v 
-                      ? "bg-stone-900 border-stone-900 shadow-lg shadow-stone-900/10" 
-                      : "bg-white border-stone-100 hover:border-stone-200"
+                      ? `border-stone-900 ${item.active} text-white shadow-lg shadow-stone-900/10 scale-105 z-10` 
+                      : "bg-white border-stone-100 text-stone-400 hover:border-stone-200"
                   )}
                 >
-                  <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
-                    energy === item.v ? "bg-white/10 text-white" : `${item.bg} ${item.color}`
-                  )}>
-                    <item.icon className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1">
-                    <p className={cn(
-                      "font-bold transition-colors",
-                      energy === item.v ? "text-white" : "text-stone-900"
-                    )}>{item.label}</p>
-                    <p className={cn(
-                      "text-xs transition-colors",
-                      energy === item.v ? "text-stone-400" : "text-stone-500"
-                    )}>{item.desc}</p>
-                  </div>
-                  {energy === item.v && (
-                    <motion.div 
-                      layoutId="energy-check"
-                      className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center"
-                    >
-                      <Check className="w-4 h-4 text-white" />
-                    </motion.div>
-                  )}
+                  <item.icon className={cn(
+                    "w-6 h-6 transition-colors",
+                    energy === item.v ? "text-white" : item.color
+                  )} />
+                  <span className="text-[8px] font-black uppercase tracking-tighter leading-none text-center">
+                    {item.label}
+                  </span>
                 </button>
               ))}
             </div>
