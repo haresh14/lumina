@@ -2,7 +2,11 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Calendar, ChevronRight, Star, Moon, Zap } from 'lucide-react';
 
-export const HomeView: React.FC = () => {
+interface HomeViewProps {
+  onStartEntry: () => void;
+}
+
+export const HomeView: React.FC<HomeViewProps> = ({ onStartEntry }) => {
   return (
     <div className="p-6 pb-32 space-y-8 max-w-lg mx-auto">
       <header className="flex justify-between items-start">
@@ -22,7 +26,10 @@ export const HomeView: React.FC = () => {
         <div className="relative z-10">
           <h2 className="text-2xl font-bold mb-2">Ready to log?</h2>
           <p className="text-emerald-100/80 mb-6">It takes less than 10 seconds to track your day.</p>
-          <button className="bg-white text-emerald-700 px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+          <button 
+            onClick={onStartEntry}
+            className="bg-white text-emerald-700 px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center gap-2"
+          >
             Start Entry
             <ChevronRight className="w-4 h-4" />
           </button>

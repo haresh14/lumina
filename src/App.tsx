@@ -27,7 +27,7 @@ function AppContent() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeView />;
+        return <HomeView onStartEntry={() => setActiveTab('log')} />;
       case 'log':
         return <LogView onComplete={() => setActiveTab('home')} />;
       case 'trends':
